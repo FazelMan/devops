@@ -1,0 +1,61 @@
+x-deploy: &deploy-section
+  mode: replicated
+  replicas: 2
+  placement:
+    constraints:
+      - node.labels.gitlab-runner == true
+      - node.role == worker
+  restart_policy:
+    condition: any
+    max_attempts: 5
+    delay: 5s
+    window: 30s
+  update_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: rollback
+    order: stop-first
+  rollback_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: pause
+    order: start-first
+
+x-env: &env-section
+  env_file:
+    - gitlab.env
+
+x-logging: &logging-section
+  driver: "json-file"
+
+x-logging-options: &logging-options
+  max-size: 10m
+  max-file: "3"
+
+version: '3.9'
+
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    networks:
+      - gitlab-runner
+    deploy:
+      <<: *deploy-section
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlab-runner-config:/etc/gitlab-runner
+    logging:
+      <<: *logging-section
+      options:
+        <<: *logging-options
+        tag: gitlab_gitlab-runner
+
+networks:
+  gitlab-runner:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
+  
+volumes:
+  gitlab-runner-config:
