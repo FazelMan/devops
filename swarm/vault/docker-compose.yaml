@@ -35,9 +35,9 @@ services:
     ports:
       - 8200:8200
     networks:
-      production:
+      valut:
         aliases:
-          - swarm.vault  
+          - valut.vault  
     volumes:
       - vault-data:/vault/file/
     environment:
@@ -50,5 +50,8 @@ volumes:
   vault-data:
 
 networks:
-  swarm:
-    external: true
+  valut:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
