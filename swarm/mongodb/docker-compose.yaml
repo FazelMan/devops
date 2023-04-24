@@ -57,7 +57,7 @@ services:
       <<: *logging-section
       options:
         <<: *logging-options
-        tag: production-mongodb_mongodb
+        tag: mongo-mongodb_mongodb
 
 networks:
   mongo:
