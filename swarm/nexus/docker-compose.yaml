@@ -1,0 +1,62 @@
+x-deploy: &deploy-section
+  mode: replicated
+  replicas: 1
+  placement:
+    constraints:
+      - node.labels.nexus == true
+  restart_policy:
+    condition: any
+    max_attempts: 5
+    delay: 5s
+    window: 30s
+  update_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: rollback
+    order: stop-first
+  rollback_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: pause
+    order: start-first
+
+x-logging: &logging-section
+  driver: "json-file"
+
+x-logging-options: &logging-options
+  max-size: 10m
+  max-file: "3"
+
+version: '3.9'
+
+services:
+  nexus:
+    image: sonatype/nexus3
+    ports:
+      - "8081:8081"
+    networks:
+      nexus:
+        aliases:
+          - nexus.nexus
+    deploy:
+      <<: *deploy-section
+      placement:
+        constraints:
+          - node.labels.nexus == true
+    volumes:
+      - nexus-data:/nexus-data
+    logging:
+      <<: *logging-section
+      options:
+        <<: *logging-options
+        tag: nexus_nexus
+
+volumes:
+  nexus-data:
+
+networks:
+  nexus:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
