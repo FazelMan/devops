@@ -1,0 +1,72 @@
+x-deploy:
+  &deploy-section
+  mode: replicated
+  replicas: 1
+  placement:
+    constraints:
+      - node.labels.mongodb == true
+  restart_policy:
+    condition: any
+    max_attempts: 5
+    delay: 5s
+    window: 30s
+  update_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: rollback
+    order: start-first
+  rollback_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: pause
+    order: start-first
+
+x-env:
+  &env-section
+  env_file:
+    - mongodb.env
+
+x-logging:
+  &logging-section
+  driver: "json-file"
+
+x-logging-options:
+  &logging-options
+  max-size: 10m
+  max-file: "3"
+
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:6.0.4-jammy
+    ports:
+      - 27017:27017
+    <<: *env-section
+    deploy:
+      <<: *deploy-section
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-configdb:/data/configdb
+      - mongodb-initjs:/docker-entrypoint-initdb.d/mongo-init.js
+    networks:
+      mongo:
+        aliases:
+          - mongo.mongodb
+    logging:
+      <<: *logging-section
+      options:
+        <<: *logging-options
+        tag: production-mongodb_mongodb
+
+networks:
+  mongo:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
+
+volumes:
+  mongodb-data:
+  mongodb-configdb:
+  mongodb-initjs:
