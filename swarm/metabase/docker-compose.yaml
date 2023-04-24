@@ -1,0 +1,77 @@
+x-deploy: &deploy-section
+  mode: replicated
+  replicas: 1
+  placement:
+    constraints:
+      - node.labels.metabase == true
+  restart_policy:
+    condition: any
+    max_attempts: 5
+    delay: 5s
+    window: 30s
+  update_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: rollback
+    order: start-first
+  rollback_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: pause
+    order: start-first
+
+x-logging: &logging-section
+  driver: "json-file"
+
+x-logging-options: &logging-options
+  max-size: 10m
+  max-file: "3"
+
+version: '3.9'
+
+services:
+  metabase:
+    image: metabase/metabase
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    env_file:
+      - metabase.env
+    networks:
+      metabase:
+        aliases:
+          - metabase.metabase
+    deploy:
+      <<: *deploy-section
+    logging:
+      <<: *logging-section
+      options:
+        <<: *logging-options
+        tag: metabase_metabase
+ 
+  postgres-metabase:
+    image: postgres:13
+    env_file:
+      - postgres-metabase.env
+    volumes:
+      - postgres-metabase-data:/var/lib/postgresql/data
+      - postgres-metabase-initsql:/docker-entrypoint-initdb.d/init.sql
+    deploy:
+      <<: *deploy-section
+    networks:
+      - metabase
+    logging:
+      <<: *logging-section
+      options:
+        <<: *logging-options
+        tag: metabase_postgres-metabase
+
+networks:
+  metabase:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
+
+volumes:
+  postgres-metabase-data:
+  postgres-metabase-initsql:
