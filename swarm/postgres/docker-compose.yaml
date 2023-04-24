@@ -46,14 +46,14 @@ services:
     deploy:
       <<: *deploy-section
     networks:
-      production:
+      postgres:
         aliases:
           - postgres.postgres
     logging:
       <<: *logging-section
       options:
         <<: *logging-options
-        tag: production-postgres_postgres
+        tag: postgres-postgres_postgres
 
 networks:
   postgres:
