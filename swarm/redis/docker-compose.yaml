@@ -1,0 +1,58 @@
+x-deploy: &deploy-section
+  mode: replicated
+  replicas: 1
+  placement:
+    constraints:
+      - node.labels.redis == true
+  restart_policy:
+    condition: any
+    max_attempts: 5
+    delay: 5s
+    window: 30s
+  update_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: rollback
+    order: stop-first
+  rollback_config:
+    parallelism: 2
+    delay: 5s
+    failure_action: pause
+    order: stop-first
+
+x-logging: &logging-section
+  driver: "json-file"
+
+x-logging-options: &logging-options
+  max-size: 10m
+  max-file: "3"
+
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7.0.5-alpine3.16
+    command: 'redis-server --save 60 1 --loglevel warning'
+    ports:
+      - 16379:6379
+    deploy:
+      <<: *deploy-section
+    networks:
+      swarm:
+        aliases:
+          - swarm.redis
+    volumes:
+      - redis-data:/data
+    logging:
+      <<: *logging-section
+      options:
+        <<: *logging-options
+        tag: staging-redis_redis
+
+networks:
+  swarm:
+    external: true
+
+volumes:
+  redis-data:
+
