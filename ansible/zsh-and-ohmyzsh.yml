@@ -1,0 +1,49 @@
+---
+- name: Install Zsh, Oh-My-Zsh, and custom plugins
+  hosts: host1
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: enable shecan in resolv.conf
+      lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver 178.22.122.100"
+        state: present
+
+    - name: apt update
+      shell: apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
+
+    - name: Install required packages
+      apt:
+        name:
+          - zsh
+          - git
+        state: present
+
+    - name: Set Zsh as the default shell
+      shell: chsh -s /bin/zsh root
+
+    - name: Clone Oh-My-Zsh repository
+      git:
+        repo: https://github.com/ohmyzsh/ohmyzsh.git
+        dest: /root/.oh-my-zsh
+
+    - name: Copy default Oh-My-Zsh configuration file
+      command: cp /root/.oh-my-zsh/templates/zshrc.zsh-template /root/.zshrc
+
+    - name: Install Zsh-Syntax-Highlighting plugin
+      git:
+        repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+        dest: /root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+
+    - name: Install zsh-autosuggestions plugin
+      git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions.git
+        dest: /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+    - name: Update Zsh config file
+      lineinfile:
+        path: /root/.zshrc
+        regexp: '^plugins='
+        line: 'plugins=(git ubuntu common-aliases systemd extract dirhistory copyfile rsync docker docker-compose zsh-autosuggestions zsh-syntax-highlighting)'
