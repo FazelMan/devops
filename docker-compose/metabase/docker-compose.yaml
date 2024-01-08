@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  metabase:
+    image: metabase/metabase
+    volumes:
+      - /dev/urandom:/dev/random:ro
+    env_file:
+      - metabase.env
+    networks:
+      metabase:
+        aliases:
+          - metabase.metabase
+ 
+  postgres-metabase:
+    image: postgres:13
+    env_file:
+      - postgres-metabase.env
+    volumes:
+      - postgres-metabase-data:/var/lib/postgresql/data
+      - postgres-metabase-initsql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - metabase
+    
+networks:
+  metabase:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
+
+volumes:
+  postgres-metabase-data:
+  postgres-metabase-initsql:
