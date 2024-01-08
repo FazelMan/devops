@@ -5,15 +5,22 @@
   become_user: root
 
   tasks:
+
+    # for persian/iranian users
     - name: enable shecan in resolv.conf
       lineinfile:
         path: /etc/resolv.conf
         line: "nameserver 178.22.122.100"
         state: present
 
-    - name: apt update
-      shell: apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
+    # if you get error on "Release file is not yet valid (https://askubuntu.com/a/1214312/1574683), uncomment this section and replace with other 
+    #- name: Update apt cache
+    #  shell: apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
 
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        
     - name: Install required packages
       apt:
         name:
