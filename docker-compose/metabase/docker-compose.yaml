@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   metabase:
-    image: metabase/metabase
+    image: metabase/metabase:v0.48.2
     volumes:
       - /dev/urandom:/dev/random:ro
     env_file:
@@ -13,7 +13,7 @@ services:
           - metabase.metabase
  
   postgres-metabase:
-    image: postgres:13
+    image: postgres:15-alpine
     env_file:
       - postgres-metabase.env
     volumes:
@@ -24,10 +24,6 @@ services:
     
 networks:
   metabase:
-    driver: overlay
-    attachable: true
-    driver_opts:
-      com.docker.network.driver.mtu: 1400
 
 volumes:
   postgres-metabase-data:
