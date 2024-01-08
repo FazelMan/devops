@@ -8,9 +8,7 @@ services:
     env_file:
       - metabase.env
     networks:
-      metabase:
-        aliases:
-          - metabase.metabase
+      - metabase
  
   postgres-metabase:
     image: postgres:15-alpine
