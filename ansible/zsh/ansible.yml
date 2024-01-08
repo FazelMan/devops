@@ -6,14 +6,14 @@
 
   tasks:
 
-    # for persian/iranian users
+    # for Persian/Iranian users
     - name: enable shecan in resolv.conf
       lineinfile:
         path: /etc/resolv.conf
         line: "nameserver 178.22.122.100"
         state: present
 
-    # if you get error on "Release file is not yet valid (https://askubuntu.com/a/1214312/1574683), uncomment this section and replace with other 
+    # If you get an error on "Release file is not yet valid (https://askubuntu.com/a/1214312/1574683), uncomment this section and replace it with the next section 
     #- name: Update apt cache
     #  shell: apt-get -o Acquire::Check-Valid-Until=false -o Acquire::Check-Date=false update
 
@@ -44,7 +44,7 @@
         repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
         dest: /root/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
-    - name: Install zsh-autosuggestions plugin
+    - name: Install zsh-autosuggestions, plugin
       git:
         repo: https://github.com/zsh-users/zsh-autosuggestions.git
         dest: /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions
