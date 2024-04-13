@@ -1,0 +1,30 @@
+version: '3.7'
+services:
+  jenkins-master:
+    image: jenkins/jenkins:lts
+    ports:
+      - 8080:8080
+    user: root
+    volumes:
+      - ~/jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins
+
+  slave1:
+    image: jforge/jenkins-inbound-agent
+    restart: always
+    init: true
+    privileged: true
+    networks:
+      - jenkins
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+      - JENKINS_SECRET=25cf8dca927df504673cd06e6901887eec71d31c7df22f4a288d67e7f1a70eea
+      - JENKINS_AGENT_NAME=slave1
+      - /var/run/docker.sock:/var/run/docker.sock
+      - JENKINS_WEB_SOCKET=true
+      - DIND=true
+      - TINI_SUBREAPER=true
+
+networks:
+  jenkins:      
