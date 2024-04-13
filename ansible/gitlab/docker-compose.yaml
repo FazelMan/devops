@@ -1,0 +1,39 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest # or > # gitlab-ce:16.10.1-ce.0
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://127.0.0.1:81/'
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        letsencrypt['enable'] = false
+        gitlab_rails['gitlab_shell_ssh_port'] = 2233
+        registry_external_url 'http://127.0.0.1:81/'
+        registry_nginx['listen_https'] = false
+    ports:
+      - '81:80'
+      - '8080:8080'
+      - '2233:22'
+    volumes:
+      - gitlab-data:/var/opt/gitlab
+      - gitlab-logs:/var/log/gitlab
+      - gitlab-config:/etc/gitlab
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: gitlab_gitlab
+    restart: always
+
+volumes:
+  gitlab-data:
+  gitlab-logs:
+  gitlab-config:
+
+networks:
+  gitlab:
+    driver: overlay
+    attachable: true
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
