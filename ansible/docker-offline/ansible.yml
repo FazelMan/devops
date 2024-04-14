@@ -1,6 +1,6 @@
 ---
 - name: Install Docker(offline mode)
-  hosts: host1
+  hosts: servers
   become: yes
   become_user: root
 
