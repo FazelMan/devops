@@ -40,3 +40,22 @@
         update_cache: yes
       tags:
         - updateـpackage
+
+    - name: Remove http_proxy and https_proxy
+      lineinfile:
+        path: /etc/environment
+        state: absent
+        regexp: '^https?_proxy='
+      tags:
+        - remove_http_proxy
+        
+    - name: Set http_proxy and https_proxy
+      lineinfile:
+        path: /etc/environment
+        line: "{{ item }}"
+        insertafter: EOF
+      loop:
+        - 'https_proxy=http://{{ http_proxy_host }}:{{ http_proxy_port }}'
+        - 'http_proxy=http://{{ http_proxy_host }}:{{ http_proxy_port }}'
+      tags:
+        - set_http_proxy
