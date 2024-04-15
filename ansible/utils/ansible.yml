@@ -8,6 +8,27 @@
     - vars.yml
 
   tasks:
+    - name: Change default route via {{ route_host }}
+      command: ip route change default via {{ route_host }}
+      tags:
+        - change_route
+
+    - name: Empty the resolv.conf file
+      copy:
+        content: ""
+        dest: /etc/resolv.conf
+      tags:
+        - change_dns
+
+    - name: Add custom dns in resolv.conf
+      lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver {{ item }}"
+        state: present
+      with_items: "{{ dns_servers }}"
+      tags:
+        - change_dns
+
     - name: Remove dpkg lock file if exists
       command: rm -f /var/lib/apt/lists/lock /var/lib/dpkg/lock-frontend
       ignore_errors: yes
@@ -19,35 +40,3 @@
         update_cache: yes
       tags:
         - updateـpackage
-
-    - name: Change default route via {{ route_host }}
-      command: ip route change default via {{ route_host }}
-      tags:
-        - change_route
-
-    - name: enable custom dns in resolv.conf
-      lineinfile:
-        path: /etc/resolv.conf
-        line: "nameserver {{ dns_server }}"
-        state: present
-      tags:
-        - change_dns
-
-    - name: Set http_proxy and https_proxy
-      lineinfile:
-        path: /etc/environment
-        line: "{{ item }}"
-        insertafter: EOF
-      loop:
-        - 'https_proxy=http://{{ http_proxy_host }}:{{ http_proxy_port }}'
-        - 'http_proxy=http://{{ http_proxy_host }}:{{ http_proxy_port }}'
-      tags:
-        - set_http_proxy
-
-    - name: Remove http_proxy and https_proxy
-      lineinfile:
-        path: /etc/environment
-        state: absent
-        regexp: '^https?_proxy='
-      tags:
-        - remove_http_proxy
