@@ -1,4 +1,6 @@
-route_host: 192.168.1.1
-http_proxy_host: 192.168.1.1
+route_host: 172.19.29.10
+http_proxy_host: 172.19.29.10
 http_proxy_port: 8118
-dns_server: 10.202.10.202 # 403.online
+dns_servers:
+  - 10.202.10.202 # 403.online
+  - 8.8.8.8 # google
